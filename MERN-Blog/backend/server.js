@@ -19,6 +19,7 @@ const allowedOrigins = [
     "http://localhost:5174",
     "http://localhost:3000",
     "https://blog-app-94fk.onrender.com",
+    "https://blog-app-2-one.vercel.app",
     process.env.FRONTEND_URL
 ].filter(Boolean);
 
