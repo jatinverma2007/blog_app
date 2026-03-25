@@ -208,7 +208,7 @@ export const likeBlog = async (req, res) => {
         return res.status(200).json({ message: 'Blog liked', blog, success: true });
     } catch (error) {
         console.log(error);
-
+        return res.status(500).json({ message: 'Failed to like blog', success: false });
     }
 }
 
@@ -227,7 +227,7 @@ export const dislikeBlog = async (req, res) => {
         return res.status(200).json({ message: 'Blog disliked', blog, success: true });
     } catch (error) {
         console.log(error);
-
+        return res.status(500).json({ message: 'Failed to dislike blog', success: false });
     }
 }
 

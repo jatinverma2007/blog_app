@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_BASE_URL from "@/config/api";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/authSlice";
@@ -32,7 +33,7 @@ const Login = () => {
     console.log(input);
 
     try {
-      const response = await axios.post(`https://blog-app-94fk.onrender.com/api/v1/user/login`, input, {
+      const response = await axios.post(`${API_BASE_URL}/api/v1/user/login`, input, {
         headers: {
           "Content-Type": "application/json"
         },
@@ -44,8 +45,8 @@ const Login = () => {
         toast.success(response.data.message)
       }
     } catch (error) {
-      console.log(error.response.data.message);
-
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Login failed. Please try again.")
     }
 
   };

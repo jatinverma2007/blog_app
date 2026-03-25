@@ -9,6 +9,7 @@ export const createComment = async (req, res) => {
     const { content } = req.body;
 
     const blog = await Blog.findById(postId);
+    if (!blog) return res.status(404).json({ message: 'Blog not found', success: false });
     if (!content) return res.status(400).json({ message: 'text is required', success: false });
 
     const comment = await Comment.create({
@@ -33,7 +34,7 @@ export const createComment = async (req, res) => {
     })
   } catch (error) {
     console.log(error);
-
+    return res.status(500).json({ message: 'Failed to create comment', success: false });
   }
 };
 
@@ -48,7 +49,7 @@ export const getCommentsOfPost = async (req, res) => {
     })
   } catch (error) {
     console.log(error);
-
+    return res.status(500).json({ message: 'Failed to get comments', success: false });
   }
 }
 

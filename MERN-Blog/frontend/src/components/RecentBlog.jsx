@@ -8,6 +8,7 @@ import { Input } from './ui/input';
 import { useNavigate } from 'react-router-dom';
 import { setBlog } from '@/redux/blogSlice';
 import axios from 'axios';
+import API_BASE_URL from '@/config/api';
 
 const tags = [
     {
@@ -42,7 +43,7 @@ const RecentBlog = () => {
     useEffect(() => {
         const getAllPublsihedBlogs = async () => {
             try {
-                const res = await axios.get(`https://blog-app-94fk.onrender.com/api/v1/blog/get-published-blogs`, { withCredentials: true })
+                const res = await axios.get(`${API_BASE_URL}/api/v1/blog/get-published-blogs`, { withCredentials: true })
                 if (res.data.success) {
                     dispatch(setBlog(res.data.blogs))
                 }
@@ -64,8 +65,8 @@ const RecentBlog = () => {
                 <div>
                     <div className='mt-10 px-4 md:px-0'>
                         {
-                            blog?.slice(0, 4)?.map((blog, index) => {
-                                return <BlogCardList key={index} blog={blog} />
+                            (blog || []).slice(0, 4)?.map((blogItem) => {
+                                return <BlogCardList key={blogItem._id} blog={blogItem} />
                             })
                         }
                     </div>

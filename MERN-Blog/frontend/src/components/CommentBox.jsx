@@ -7,6 +7,7 @@ import { LuSend } from "react-icons/lu";
 import { Button } from './ui/button';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import API_BASE_URL from '@/config/api';
 import { toast } from 'sonner';
 import { setBlog } from '@/redux/blogSlice';
 import { setComment } from '@/redux/commentSlice';
@@ -33,6 +34,9 @@ const CommentBox = ({ selectedBlog }) => {
 
     const dispatch = useDispatch()
 
+    // Ensure comment is always an array
+    const commentList = Array.isArray(comment) ? comment : []
+
     const handleReplyClick = (commentId) => {
         setActiveReplyId(activeReplyId === commentId ? null : commentId);
         setReplyText('');
@@ -53,20 +57,26 @@ const CommentBox = ({ selectedBlog }) => {
     useEffect(() => {
         const getAllCommentsOfBlog = async () => {
             try {
-                const res = await axios.get(`https://blog-app-94fk.onrender.com/api/v1/comment/${selectedBlog._id}/comment/all`)
+                const res = await axios.get(`${API_BASE_URL}/api/v1/comment/${selectedBlog?._id}/comment/all`)
                 const data = res.data.comments
-                dispatch(setComment(data))
+                dispatch(setComment(data || []))
             } catch (error) {
                 console.log(error);
 
             }
         }
-        getAllCommentsOfBlog()
-    }, [])
+        if (selectedBlog?._id) {
+            getAllCommentsOfBlog()
+        }
+    }, [selectedBlog?._id])
 
     const commentHandler = async () => {
+        if (!content.trim()) {
+            toast.error("Please write a comment")
+            return
+        }
         try {
-            const res = await axios.post(`https://blog-app-94fk.onrender.com/api/v1/comment/${selectedBlog._id}/create`, { content }, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/comment/${selectedBlog._id}/create`, { content }, {
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -76,14 +86,14 @@ const CommentBox = ({ selectedBlog }) => {
                 let updatedCommentData
                 console.log(comment);
 
-                if (comment.length >= 1) {
-                    updatedCommentData = [...comment, res.data.comment]
+                if (commentList.length >= 1) {
+                    updatedCommentData = [...commentList, res.data.comment]
                 } else {
                     updatedCommentData = [res.data.comment]
                 }
                 dispatch(setComment(updatedCommentData))
 
-                const updatedBlogData = blog.map(p =>
+                const updatedBlogData = (blog || []).map(p =>
                     p._id === selectedBlog._id ? { ...p, comments: updatedCommentData } : p
                 );
                 dispatch(setBlog(updatedBlogData))
@@ -92,18 +102,18 @@ const CommentBox = ({ selectedBlog }) => {
             }
         } catch (error) {
             console.log(error);
-            toast.error("comment add nhi hua")
+            toast.error(error?.response?.data?.message || "Failed to add comment")
 
         }
     }
 
     const deleteComment = async (commentId) => {
         try {
-            const res = await axios.delete(`https://blog-app-94fk.onrender.com/api/v1/comment/${commentId}/delete`, {
+            const res = await axios.delete(`${API_BASE_URL}/api/v1/comment/${commentId}/delete`, {
                 withCredentials: true
             })
             if (res.data.success) {
-                const updatedCommentData = comment.filter((item) => item._id !== commentId)
+                const updatedCommentData = commentList.filter((item) => item._id !== commentId)
                 console.log(updatedCommentData);
 
                 dispatch(setComment(updatedCommentData))
@@ -111,7 +121,7 @@ const CommentBox = ({ selectedBlog }) => {
             }
         } catch (error) {
             console.log(error);
-            toast.error("comment delete nhi hua bhai")
+            toast.error(error?.response?.data?.message || "Failed to delete comment")
 
         }
     }
@@ -119,7 +129,7 @@ const CommentBox = ({ selectedBlog }) => {
     const editCommentHandler = async (commentId) => {
         try {
             const res = await axios.put(
-                `https://blog-app-94fk.onrender.com/api/v1/comment/${commentId}/edit`,
+                `${API_BASE_URL}/api/v1/comment/${commentId}/edit`,
                 { content: editedContent },
                 {
                     withCredentials: true,
@@ -130,7 +140,7 @@ const CommentBox = ({ selectedBlog }) => {
             );
 
             if (res.data.success) {
-                const updatedCommentData = comment.map(item =>
+                const updatedCommentData = commentList.map(item =>
                     item._id === commentId ? { ...item, content: editedContent } : item
                 );
                 dispatch(setComment(updatedCommentData));
@@ -147,7 +157,7 @@ const CommentBox = ({ selectedBlog }) => {
      const likeCommentHandler = async (commentId) => {
          try {
              const res = await axios.get(
-                 `https://blog-app-94fk.onrender.com/api/v1/comment/${commentId}/like`,
+                 `${API_BASE_URL}/api/v1/comment/${commentId}/like`,
                  {
                      withCredentials: true,
                  }
@@ -156,7 +166,7 @@ const CommentBox = ({ selectedBlog }) => {
              if (res.data.success) {
                  const updatedComment = res.data.updatedComment;
 
-                 const updatedCommentList = comment.map(item =>
+                 const updatedCommentList = commentList.map(item =>
                      item._id === commentId ? updatedComment : item
                  );
 
@@ -174,10 +184,10 @@ const CommentBox = ({ selectedBlog }) => {
         <div>
             <div className='flex gap-4 mb-4 items-center'>
                 <Avatar>
-                    <AvatarImage src={user.photoUrl} />
+                    <AvatarImage src={user?.photoUrl} />
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <h3 className='font-semibold'>{user.firstName} {user.lastName}</h3>
+                <h3 className='font-semibold'>{user?.firstName} {user?.lastName}</h3>
             </div>
             <div className='flex gap-3'>
                 <Textarea
@@ -189,10 +199,10 @@ const CommentBox = ({ selectedBlog }) => {
                 <Button onClick={commentHandler}><LuSend /></Button>
             </div>
             {
-                comment.length > 0 ? <div className='mt-7 bg-gray-100 dark:bg-gray-800 p-5 rounded-md'>
+                commentList.length > 0 ? <div className='mt-7 bg-gray-100 dark:bg-gray-800 p-5 rounded-md'>
                     {
-                        comment.map((item, index) => {
-                            return <div key={index} className='mb-4'>
+                        commentList.map((item, index) => {
+                            return <div key={item?._id || index} className='mb-4'>
                                 <div className='flex items-center justify-between'>
                                     <div className='flex gap-3 items-start'>
                                         <Avatar>
@@ -224,11 +234,11 @@ const CommentBox = ({ selectedBlog }) => {
                                                         onClick={() => likeCommentHandler(item._id)}
                                                     >
                                                         {
-                                                            item.likes.includes(user._id)
+                                                            item?.likes?.includes(user?._id)
                                                                 ? <FaHeart fill='red' />
                                                                 : <FaRegHeart />
                                                         }
-                                                        <span>{item.numberOfLikes}</span>
+                                                        <span>{item?.numberOfLikes || 0}</span>
                                                     </div>
 
                                                 </div>
@@ -244,7 +254,7 @@ const CommentBox = ({ selectedBlog }) => {
                                     </div>
                                     {/* <Button><Trash2/></Button> */}
                                     {
-                                        user._id === item?.userId?._id ? <DropdownMenu>
+                                        user?._id === item?.userId?._id ? <DropdownMenu>
                                             <DropdownMenuTrigger><BsThreeDots /></DropdownMenuTrigger>
                                             <DropdownMenuContent className="w-[180px]">
                                                 <DropdownMenuItem onClick={() => {

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner'
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { setUser } from '@/redux/authSlice'
 import userLogo from "../assets/user.jpg"
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
@@ -56,7 +57,7 @@ const Navbar = () => {
     const logoutHandler = async (e) => {
 
         try {
-            const res = await axios.get(`https://blog-app-94fk.onrender.com/api/v1/user/logout`, { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/user/logout`, { withCredentials: true });
             if (res.data.success) {
                 navigate("/")
                 dispatch(setUser(null))
@@ -64,7 +65,7 @@ const Navbar = () => {
             }
         } catch (error) {
             console.log(error);
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message || "Logout failed")
 
         }
     }

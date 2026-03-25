@@ -1,4 +1,5 @@
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import React, { useEffect, useState } from 'react'
 import userLogo from "../assets/user.jpg"
 
@@ -6,7 +7,7 @@ const PopularAuthors = () => {
     const [popularUser, setPopularUser] = useState([])
     const getAllUsers = async () => {
         try {
-            const res = await axios.get(`https://blog-app-94fk.onrender.com/api/v1/user/all-users`)
+            const res = await axios.get(`${API_BASE_URL}/api/v1/user/all-users`)
             if (res.data.success) {
                 setPopularUser(res.data.users)
             }
@@ -27,8 +28,8 @@ const PopularAuthors = () => {
                 </div>
                 <div className='flex items-center justify-around my-10 px-4 md:px-0'>
                     {
-                        popularUser?.slice(0,3)?.map((user, index) => {
-                            return <div key={index} className='flex flex-col gap-2 items-center'>
+                        (popularUser || []).slice(0,3)?.map((user) => {
+                            return <div key={user._id} className='flex flex-col gap-2 items-center'>
                                 <img src={user.photoUrl || userLogo} alt=""  className='rounded-full h-16 w-16 md:w-32 md:h-32' />
                                 <p className='font-semibold'>{user.firstName} {user.lastName}</p>
                             </div>

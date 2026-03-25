@@ -5,12 +5,15 @@ import { createComment, deleteComment, editComment, getAllCommentsOnMyBlogs, get
 
 const router = express.Router()
 
+// IMPORTANT: Specific routes MUST come before parameterized routes
+router.get('/my-blogs/comments', isAuthenticated, getAllCommentsOnMyBlogs)
+
+// Parameterized routes come after
 router.post('/:id/create', isAuthenticated, createComment);
 router.delete("/:id/delete", isAuthenticated, deleteComment);
 router.put("/:id/edit", isAuthenticated, editComment);
 router.route("/:id/comment/all").get(getCommentsOfPost);
 router.get('/:id/like', isAuthenticated, likeComment);
-router.get('/my-blogs/comments', isAuthenticated, getAllCommentsOnMyBlogs)
 
 
 export default router;

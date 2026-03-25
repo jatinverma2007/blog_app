@@ -2,6 +2,7 @@ import BlogCard from '@/components/BlogCard'
 import React, { useEffect } from 'react'
 import LMS from "../assets/LMS.png"
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { useDispatch, useSelector } from 'react-redux'
 import { setBlog } from '@/redux/blogSlice'
 // import BlogCardList from '@/components/BlogCardList'
@@ -68,7 +69,7 @@ const Blog = () => {
     useEffect(() => {
         const getAllPublsihedBlogs = async () => {
             try {
-                const res = await axios.get(`https://blog-app-94fk.onrender.com/api/v1/blog/get-published-blogs`, { withCredentials: true })
+                const res = await axios.get(`${API_BASE_URL}/api/v1/blog/get-published-blogs`, { withCredentials: true })
                 if (res.data.success) {
                     dispatch(setBlog(res.data.blogs))
                 }
@@ -89,8 +90,8 @@ const Blog = () => {
             </div>
             <div className='max-w-6xl mx-auto grid gap-10 grid-cols-1 md:grid-cols-3 py-10 px-4 md:px-0'>
                 {
-                    blog?.map((blog, index) => {
-                        return <BlogCard blog={blog} key={index} />
+                    (blog || []).map((blogItem) => {
+                        return <BlogCard blog={blogItem} key={blogItem._id} />
                     })
                 }
             </div>

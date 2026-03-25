@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { Edit, Eye, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -10,7 +11,7 @@ const Comments = () => {
     const navigate = useNavigate()
     const getTotalComments = async()=>{
         try {
-          const res = await axios.get(`https://blog-app-94fk.onrender.com/api/v1/comment/my-blogs/comments`,{withCredentials:true})
+          const res = await axios.get(`${API_BASE_URL}/api/v1/comment/my-blogs/comments`,{withCredentials:true})
           if(res.data.success){
             setAllComments(res.data.comments)
           }
@@ -41,17 +42,17 @@ const Comments = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {allComments?.map((comment, index) => (
-                        <TableRow key={index}>
+                    {(allComments || []).map((comment) => (
+                        <TableRow key={comment._id}>
                             {/* <TableCell className="font-medium">{item.author.firstName}</TableCell> */}
                             <TableCell className="flex gap-4 items-center">
                                 {/* <img src={item.thumbnail} alt="" className='w-20 rounded-md hidden md:block' /> */}
-                                {comment.postId.title}
+                                {comment?.postId?.title || 'Untitled'}
                             </TableCell>
-                            <TableCell>{comment.content}</TableCell>
-                            <TableCell className="">{comment.userId.firstName}</TableCell>
+                            <TableCell>{comment?.content}</TableCell>
+                            <TableCell className="">{comment?.userId?.firstName || 'Unknown'}</TableCell>
                             <TableCell className="text-right flex gap-3 items-center justify-center">
-                                <Eye className='cursor-pointer' onClick={() => navigate(`/blogs/${comment.postId._id}`)} />
+                                <Eye className='cursor-pointer' onClick={() => navigate(`/blogs/${comment?.postId?._id}`)} />
                             </TableCell>
                         </TableRow>
                     ))}

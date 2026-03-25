@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { setBlog } from '@/redux/blogSlice'
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { Loader2 } from 'lucide-react'
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -22,17 +23,21 @@ const CreateBlog = () => {
         setCategory(value)
     }
     const createBlogHandler = async () => {
-        
+        if (!title.trim() || !category) {
+            toast.error("Please fill in all fields")
+            return
+        }
+
         try {
             setLoading(true)
-            const res = await axios.post(`https://blog-app-94fk.onrender.com/api/v1/blog/`, { title, category }, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/blog/`, { title, category }, {
                 headers: {
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
             })
             if (res.data.success) {
-                dispatch(setBlog([...blog, res.data.blog]))
+                dispatch(setBlog([...(blog || []), res.data.blog]))
                 navigate(`/dashboard/write-blog/${res.data.blog._id}`)
                 toast.success(res.data.message)
             } else {
@@ -40,6 +45,7 @@ const CreateBlog = () => {
             }
         } catch (error) {
             console.log(error)
+            toast.error(error?.response?.data?.message || "Failed to create blog")
         } finally {
             setLoading(false)
         }

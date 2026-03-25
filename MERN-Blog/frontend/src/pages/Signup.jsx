@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { toast } from 'sonner'
 import auth from "../assets/auth.jpg"
 
@@ -32,7 +33,7 @@ const Signup = () => {
         console.log(user)
 
         try {
-            const response = await axios.post(`https://blog-app-94fk.onrender.com/api/v1/user/register`, user, {
+            const response = await axios.post(`${API_BASE_URL}/api/v1/user/register`, user, {
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -46,7 +47,7 @@ const Signup = () => {
             }
         } catch (error) {
             console.log(error);
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message || "Registration failed. Please try again.")
 
 
         }

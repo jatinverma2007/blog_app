@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input'
 import { Link, useNavigate } from 'react-router-dom'
 import { Textarea } from '@/components/ui/textarea'
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { setUser } from '@/redux/authSlice'
@@ -69,7 +70,7 @@ const Profile = () => {
 
         try {
             setLoading(true)
-            const res = await axios.put(`https://blog-app-94fk.onrender.com/api/v1/user/profile/update`, formData, {
+            const res = await axios.put(`${API_BASE_URL}/api/v1/user/profile/update`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
                 },
@@ -82,7 +83,7 @@ const Profile = () => {
             }
         } catch (error) {
             console.log(error);
-
+            toast.error(error?.response?.data?.message || "Failed to update profile")
         } finally {
             setLoading(false)
         }

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table"
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { setBlog } from '@/redux/blogSlice'
 import { Edit, Eye, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -73,7 +74,7 @@ const YourBlog = () => {
 
     const getOwnBlog = async () => {
         try {
-            const res = await axios.get(`https://blog-app-94fk.onrender.com/api/v1/blog/get-own-blogs`, { withCredentials: true })
+            const res = await axios.get(`${API_BASE_URL}/api/v1/blog/get-own-blogs`, { withCredentials: true })
             if (res.data.success) {
                 dispatch(setBlog(res.data.blogs))
             }
@@ -84,9 +85,9 @@ const YourBlog = () => {
     }
     const deleteBlog = async (id) => {
         try {
-            const res = await axios.delete(`https://blog-app-94fk.onrender.com/api/v1/blog/delete/${id}`, { withCredentials: true })
+            const res = await axios.delete(`${API_BASE_URL}/api/v1/blog/delete/${id}`, { withCredentials: true })
             if (res.data.success) {
-                const updatedBlogData = blog.filter((blogItem) => blogItem?._id !== id);
+                const updatedBlogData = (blog || []).filter((blogItem) => blogItem?._id !== id);
                 dispatch(setBlog(updatedBlogData))
                 toast.success(res.data.message)
             }
@@ -94,7 +95,7 @@ const YourBlog = () => {
 
         } catch (error) {
             console.log(error);
-            toast.error("something went error")
+            toast.error(error?.response?.data?.message || "Something went wrong")
         }
 
     }
@@ -103,8 +104,9 @@ const YourBlog = () => {
     }, [])
 
 
-    const formatDate = (index) => {
-        const date = new Date(blog[index].createdAt)
+    const formatDate = (item) => {
+        if (!item?.createdAt) return 'N/A'
+        const date = new Date(item.createdAt)
         const formattedDate = date.toLocaleDateString("en-GB");
         return formattedDate
         // console.log("formattedDate", date);
@@ -128,20 +130,20 @@ const YourBlog = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody className="overflow-x-auto ">
-                            {blog?.map((item, index) => (
-                                <TableRow key={index}>
+                            {(blog || []).map((item) => (
+                                <TableRow key={item._id}>
                                     {/* <TableCell className="font-medium">{item.author.firstName}</TableCell> */}
                                     <TableCell className="flex gap-4 items-center">
                                         <img src={item.thumbnail} alt="" className='w-20 rounded-md hidden md:block' />
                                         <h1 className='hover:underline cursor-pointer' onClick={() => navigate(`/blogs/${item._id}`)}>{item.title}</h1>
                                     </TableCell>
                                     <TableCell>{item.category}</TableCell>
-                                    <TableCell className="">{formatDate(index)}</TableCell>
+                                    <TableCell className="">{formatDate(item)}</TableCell>
                                     <TableCell className="text-center">
                                         {/* <Eye className='cursor-pointer' onClick={() => navigate(`/blogs/${item._id}`)} />
                                         <Edit className='cursor-pointer' onClick={() => navigate(`/dashboard/write-blog/${item._id}`)} />
                                         <Trash2 className='cursor-pointer' onClick={() => deleteBlog(item._id)} /> */}
-                                        
+
                                         <DropdownMenu>
                                             <DropdownMenuTrigger><BsThreeDotsVertical/></DropdownMenuTrigger>
                                             <DropdownMenuContent className="w-[180px]">

@@ -16,12 +16,13 @@ import JoditEditor from 'jodit-react';
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
+import API_BASE_URL from '@/config/api'
 import { toast } from 'sonner'
 import { setBlog } from '@/redux/blogSlice'
 
 const UpdateBlog = () => {
     const editor = useRef(null);
-   
+
     const [loading, setLoading] = useState(false)
     const [publish, setPublish] = useState(false)
     const params = useParams()
@@ -29,16 +30,16 @@ const UpdateBlog = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const { blog } = useSelector(store => store.blog)
-    const selectBlog = blog.find(blog => blog._id === id)
-    const [content, setContent] = useState(selectBlog.description);
+    const selectBlog = blog?.find(blog => blog._id === id)
+    const [content, setContent] = useState(selectBlog?.description || "");
 
     const [blogData, setBlogData] = useState({
-        title: selectBlog?.title,
-        subtitle: selectBlog?.subtitle,
+        title: selectBlog?.title || "",
+        subtitle: selectBlog?.subtitle || "",
         description: content,
-        category: selectBlog?.category,
+        category: selectBlog?.category || "",
     });
-    const [previewThumbnail, setPreviewThumbnail] = useState(selectBlog?.thumbnail);
+    const [previewThumbnail, setPreviewThumbnail] = useState(selectBlog?.thumbnail || "");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -72,7 +73,7 @@ const UpdateBlog = () => {
         formData.append("file", blogData.thumbnail);
         try {
             setLoading(true)
-            const res = await axios.put(`https://blog-app-94fk.onrender.com/api/v1/blog/${id}`, formData, {
+            const res = await axios.put(`${API_BASE_URL}/api/v1/blog/${id}`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
                 },
@@ -97,12 +98,11 @@ const UpdateBlog = () => {
         console.log("action", action);
 
         try {
-            const res = await axios.patch(`https://blog-app-94fk.onrender.com/api/v1/blog/${id}`, {
-                params: {
-                    action
-                },
-                withCredentials: true
-            })
+            const res = await axios.patch(
+                `${API_BASE_URL}/api/v1/blog/${id}?publish=${action}`,
+                {},
+                { withCredentials: true }
+            )
             if (res.data.success) {
                 setPublish(!publish)
                 toast.success(res.data.message)
@@ -112,13 +112,13 @@ const UpdateBlog = () => {
             }
         } catch (error) {
             console.log(error);
-
+            toast.error(error?.response?.data?.message || "Something went wrong")
         }
     }
 
     const deleteBlog = async () => {
         try {
-            const res = await axios.delete(`https://blog-app-94fk.onrender.com/api/v1/blog/delete/${id}`, { withCredentials: true })
+            const res = await axios.delete(`${API_BASE_URL}/api/v1/blog/delete/${id}`, { withCredentials: true })
             if (res.data.success) {
                 const updatedBlogData = blog.filter((blogItem) => blogItem?._id !== id);
                 dispatch(setBlog(updatedBlogData))
