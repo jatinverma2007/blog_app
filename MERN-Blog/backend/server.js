@@ -7,21 +7,24 @@ import commentRoute from "./routes/comment.route.js"
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import path from "path"
+import { fileURLToPath } from "url"
 
 dotenv.config()
 const app = express()
 
 const PORT = process.env.PORT || 3000
 
-// Allowed origins for CORS (supports both development and production)
 const allowedOrigins = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:3000",
     "https://blog-app-94fk.onrender.com",
     "https://blog-app-2-one.vercel.app",
-    process.env.FRONTEND_URL
-].filter(Boolean);
+    process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL_2
+].flatMap((origin) => origin?.split(",") ?? [])
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
 // default middleware
 app.use(express.json());
@@ -41,19 +44,42 @@ app.use(cors({
     credentials: true
 }))
 
-const _dirname = path.resolve()
+const backendDirectory = path.dirname(fileURLToPath(import.meta.url))
+const frontendDist = path.resolve(backendDirectory, "../frontend/dist")
 
 // apis
- app.use("/api/v1/user", userRoute)
- app.use("/api/v1/blog", blogRoute)
- app.use("/api/v1/comment", commentRoute)
+app.get("/healthz", (_, res) => {
+    res.status(200).json({ status: "ok" })
+})
 
- app.use(express.static(path.join(_dirname,"/frontend/dist")));
- app.get("*", (_, res)=>{
-    res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"))
- });
+app.use("/api/v1/user", userRoute)
+app.use("/api/v1/blog", blogRoute)
+app.use("/api/v1/comment", commentRoute)
 
-app.listen(PORT, ()=>{
-    console.log(`Server listen at port ${PORT}`);
-    connectDB()
+app.use("/api", (_, res) => {
+    res.status(404).json({ success: false, message: "API route not found" })
+})
+
+app.use(express.static(frontendDist))
+app.get("*", (_, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"))
+})
+
+const startServer = async () => {
+    if (!process.env.MONGO_URI) {
+        throw new Error("MONGO_URI environment variable is required")
+    }
+    if (!process.env.SECRET_KEY) {
+        throw new Error("SECRET_KEY environment variable is required")
+    }
+
+    await connectDB()
+    app.listen(PORT, () => {
+        console.log(`Server listening on port ${PORT}`)
+    })
+}
+
+startServer().catch((error) => {
+    console.error("Failed to start server:", error)
+    process.exit(1)
 })

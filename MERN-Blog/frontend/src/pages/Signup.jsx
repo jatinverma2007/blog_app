@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -30,7 +30,6 @@ const Signup = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(user)
 
         try {
             const response = await axios.post(`${API_BASE_URL}/api/v1/user/register`, user, {
@@ -46,7 +45,6 @@ const Signup = () => {
                 toast.error(response.data.message)
             }
         } catch (error) {
-            console.log(error);
             toast.error(error?.response?.data?.message || "Registration failed. Please try again.")
 
 

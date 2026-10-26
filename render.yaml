@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: mern-blog
+    runtime: node
+    rootDir: MERN-Blog
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://blog-app-2-one.vercel.app
+      - key: FRONTEND_URL_2
+        sync: false
+      - key: CLOUD_NAME
+        sync: false
+      - key: API_KEY
+        sync: false
+      - key: API_SECRET
+        sync: false

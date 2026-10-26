@@ -30,7 +30,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(input);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/api/v1/user/login`, input, {
@@ -45,7 +44,6 @@ const Login = () => {
         toast.success(response.data.message)
       }
     } catch (error) {
-      console.log(error);
       toast.error(error?.response?.data?.message || "Login failed. Please try again.")
     }
 
@@ -94,7 +92,7 @@ const Login = () => {
             </div>
 
             <Button type="submit" className="w-full">Login</Button>
-            <p className='text-center text-gray-600 dark:text-gray-300'>Don't have an account? <Link to={'/signup'}><span className='underline cursor-pointer hover:text-gray-800'>Sign up</span></Link></p>
+            <p className='text-center text-gray-600 dark:text-gray-300'>Don&apos;t have an account? <Link to={'/signup'}><span className='underline cursor-pointer hover:text-gray-800'>Sign up</span></Link></p>
           </form>
         </CardContent>
       </Card>
